@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>JSON to HTML Converter</title>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            #jsonInput {
+                width: 100%;
+                height: 150px;
+            }
+            #convertButton {
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>JSON to HTML Converter</h2>
+        <textarea id="jsonInput" placeholder="Enter JSON here..."></textarea>
+        <br />
+        <button id="convertButton">Convert to HTML</button>
+        <div id="output"></div>
+
+        <script>
+            document
+                .getElementById("convertButton")
+                .addEventListener("click", function () {
+                    const jsonInput =
+                        document.getElementById("jsonInput").value;
+                    try {
+                        const data = parseNonStandardJson(jsonInput);
+                        const table = createTableFromJson(data);
+                        document.getElementById("output").innerHTML = "";
+                        document.getElementById("output").appendChild(table);
+                    } catch (e) {
+                        document.getElementById("output").innerHTML =
+                            '<p style="color:red;">Invalid JSON format!</p>';
+                    }
+                });
+
+            // Function to parse non-standard JSON format to a valid JSON object
+            function parseNonStandardJson(input) {
+                const jsonStr = input
+                    .replace(/{/g, '{"') // Replace '{' with '{"'
+                    .replace(/}/g, '"}') // Replace '}' with '"}'
+                    .replace(/, /g, '", "') // Replace ', ' with '", "'
+                    .replace(/=/g, '": "') // Replace '=' with '": "'
+                    .replace(/"(\d+)"(?=:)/g, "$1") // Remove quotes around numeric keys
+                    .replace(/"undefined"/g, "null"); // Convert 'undefined' to null
+
+                return JSON.parse(jsonStr);
+            }
+
+            // Convert JSON data to an HTML table
+            function createTableFromJson(jsonData) {
+                const table = document.createElement("table");
+                const tbody = document.createElement("tbody");
+
+                // Create table rows for each key-value pair
+                for (const key in jsonData) {
+                    const row = document.createElement("tr");
+                    const keyCell = document.createElement("th");
+                    const valueCell = document.createElement("td");
+
+                    keyCell.textContent = key;
+                    valueCell.textContent = jsonData[key];
+                    row.appendChild(keyCell);
+                    row.appendChild(valueCell);
+                    tbody.appendChild(row);
+                }
+
+                table.appendChild(tbody);
+                return table;
+            }
+        </script>
+    </body>
+</html>
